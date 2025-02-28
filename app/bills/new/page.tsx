@@ -99,7 +99,7 @@ export function YearSelect(props: {
   );
 }
 
-export default function NewBill() {
+export default function NewBillPage() {
   const [formData, setFormData] = useState({
     month: "1",
     year: "2025",
@@ -239,7 +239,7 @@ export default function NewBill() {
       }
       router.push(`/bills/${id}`);
     } catch (error) {
-      console.error("Error saving bill:", error);
+      console.debug("Error saving bill:", error);
       toast.error("Could not save bill");
     } finally {
       setIsLoading(false);
@@ -249,7 +249,7 @@ export default function NewBill() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log(formData);
+    console.debug("formData in handleSubmit", formData);
 
     // Flat, Month, Year are required fields
     const missingFields = [];
@@ -291,7 +291,11 @@ export default function NewBill() {
   const header = () => {
     return (
       <div className="flex items-center my-4">
-        <Button variant={"default"} onClick={() => router.back()}>
+        <Button
+          variant={"default"}
+          onClick={() => router.back()}
+          className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
+        >
           <FaArrowLeft />
         </Button>
         <h1 className="text-2xl font-bold mx-4">New Bill</h1>
@@ -517,7 +521,7 @@ export default function NewBill() {
           disabled={isLoading}
           type="submit"
           variant={"default"}
-          className="w-full"
+          className="w-full rounded-full"
         >
           {isLoading ? "Creating..." : "Create Bill"}
         </Button>

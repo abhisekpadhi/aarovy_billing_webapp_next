@@ -1,6 +1,32 @@
 import { GistUtils } from "@/lib/github_gist_utils";
 import { NextRequest, NextResponse } from "next/server";
 
+// Get bills with filter by month and year
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const year = searchParams.get("year");
+  const month = searchParams.get("month");
+
+  if (!year || !month) {
+    return NextResponse.json(
+      { success: false, message: "Year and month are required", data: null },
+      { status: 400 }
+    );
+  }
+
+  const { content } = await GistUtils.getOrCreateMonthlyBillsGist(
+    parseInt(year),
+    parseInt(month)
+  );
+
+  return NextResponse.json({
+    success: true,
+    message: "Bills fetched successfully",
+    data: content,
+  });
+}
+
+// Create or update a bill
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const fileName = `aarovy_bills_${body.year}_${body.month}.json`;
