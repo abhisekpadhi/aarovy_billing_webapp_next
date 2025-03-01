@@ -1,7 +1,10 @@
 import axios from "axios";
 
-const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-const INDEX_GIST_ID = "5a7543fd6830b86db42c372813d2f86f";
+const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN || "";
+const INDEX_GIST_ID = process.env.INDEX_GIST_ID || "";
+const FLAT_DETAILS_GIST_ID = process.env.FLAT_DETAILS_GIST_ID || "";
+const FLAT_DETAILS_FILE_NAME = process.env.FLAT_DETAILS_FILE_NAME || "";
+const INDEX_FILE_NAME = process.env.INDEX_FILE_NAME || "";
 
 const createNewGist = async (
   name: string,
@@ -31,15 +34,17 @@ const createNewGist = async (
 };
 
 const getGistContent = async (gistId: string, fileName: string) => {
+  console.debug("Getting gist content:", gistId, fileName);
   const response = await axios.get(`https://api.github.com/gists/${gistId}`, {
     headers: {
       Authorization: `Bearer ${GITHUB_ACCESS_TOKEN}`,
       Accept: "application/vnd.github.v3+json",
     },
   });
-  // console.log("response of get gist", response.data);
+  console.debug("filename", fileName);
+  console.debug("response of get gist", response.data.files);
 
-  const rawUrl = response.data.files[fileName].raw_url;
+  const rawUrl = response.data.files[fileName]["raw_url"];
 
   const fileContent = await axios.get(rawUrl);
 
@@ -51,7 +56,7 @@ const updateGistContent = async (
   content: string,
   fileName: string
 ) => {
-  console.log("Updating gist:", gistId, fileName);
+  console.debug("Updating gist:", gistId, fileName);
   try {
     const response = await axios.patch(
       `https://api.github.com/gists/${gistId}`,
@@ -70,7 +75,7 @@ const updateGistContent = async (
         },
       }
     );
-    console.log("Gist updated successfully:", response.data);
+    console.debug("Gist updated successfully:", response.data);
   } catch (error) {
     console.error("Error updating gist:", error);
   }
@@ -88,7 +93,7 @@ const getIndex = async () => {
       }
     );
 
-    const rawUrl = response.data.files["aarovy_bills_gists.json"].raw_url;
+    const rawUrl = response.data.files[INDEX_FILE_NAME].raw_url;
 
     const fileContent = await axios.get(rawUrl);
 
@@ -102,8 +107,11 @@ const getIndex = async () => {
 const updateIndex = async (key: string, value: string) => {
   const index = await getIndex();
   index[key] = value;
-  const fileName = "aarovy_bills_gists.json";
-  await updateGistContent(INDEX_GIST_ID, index, fileName);
+  await updateGistContent(
+    INDEX_GIST_ID,
+    JSON.stringify(index),
+    INDEX_FILE_NAME
+  );
 };
 
 const createMonthlyBillGist = async (year: number, month: number) => {
@@ -141,7 +149,22 @@ const getOrCreateMonthlyBillsGist = async (year: number, month: number) => {
   };
 };
 
+const getFlatDetails = async () => {
+  const gistId = FLAT_DETAILS_GIST_ID;
+  const fileName = FLAT_DETAILS_FILE_NAME;
+  const content = await getGistContent(gistId, fileName);
+  return content;
+};
+
+const updateFlatDetails = async (content: string) => {
+  const gistId = FLAT_DETAILS_GIST_ID;
+  const fileName = FLAT_DETAILS_FILE_NAME;
+  await updateGistContent(gistId, content, fileName);
+};
+
 export const GistUtils = {
+  updateFlatDetails,
+  getFlatDetails,
   getOrCreateMonthlyBillsGist,
   getGistContent,
   updateGistContent,

@@ -11,22 +11,22 @@ import { FaCog } from "react-icons/fa";
 import { FaCalendar, FaPlus } from "react-icons/fa6";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 export function MonthSelect(props: {
   value: string | undefined;
@@ -143,7 +143,7 @@ export default function BillsPage() {
 
   const header = () => {
     return (
-      <div className="flex items-center my-4 justify-between">
+      <div className="flex items-center mb-4 justify-between">
         <div>
           <h1 className="text-2xl font-bold mx-4">AAROVY</h1>
         </div>

@@ -1,11 +1,12 @@
 "use client";
 import { AppCtx } from "@/app/layout";
+import PdfBill from "@/components/custom/PdfBill";
 import { Button } from "@/components/ui/button";
 import { BillType } from "@/lib/models";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { FaArrowLeft } from "react-icons/fa6";
+import { FaArrowLeft, FaPencil } from "react-icons/fa6";
 
 export default function ViewBillPage({
   params,
@@ -19,7 +20,7 @@ export default function ViewBillPage({
     throw new Error("AppCtx not found");
   }
 
-  const { bills } = appCtx;
+  const { billCached } = appCtx;
   const [bill, setBill] = useState<BillType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -34,30 +35,31 @@ export default function ViewBillPage({
 
   useEffect(() => {
     (async () => {
-      const id = (await params).id;
-      console.debug("id", id);
-      if (!id) {
+      const idFromParams = (await params).id;
+      console.debug("id", idFromParams);
+      if (!idFromParams) {
         console.debug("No id found");
         setIsLoading(false);
         toast.error("No id found");
         return;
       }
-      const [year, month, flat] = id.split("_");
+      const [year, month, flat] = idFromParams.split("_");
       console.debug("year", year, "month", month, "flat", flat);
-      const bill = bills.find(
-        (bill) =>
-          bill.year === year && bill.month === month && bill.flat === flat
-      );
-      console.debug("bill from context", bill);
-      if (bill) {
-        setBill(bill);
+      console.debug("bill from context", billCached);
+
+      if (
+        billCached.year === year &&
+        billCached.month === month &&
+        billCached.flat === flat
+      ) {
+        setBill(billCached);
       }
       if (!bill) {
-        await fetchBillFromDB(id);
+        await fetchBillFromDB(idFromParams);
       }
       setIsLoading(false);
     })();
-  }, [bills, params]);
+  }, [bill, billCached, params]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -69,15 +71,32 @@ export default function ViewBillPage({
 
   const header = () => {
     return (
-      <div className="flex items-center my-4">
-        <Button
-          variant={"default"}
-          onClick={() => router.back()}
-          className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
-        >
-          <FaArrowLeft />
-        </Button>
-        <h1 className="text-2xl font-bold mx-4">Bill</h1>
+      <div className="flex items-center mb-4 justify-between">
+        <div className="flex items-center">
+          <Button
+            variant={"default"}
+            onClick={() => router.back()}
+            className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
+          >
+            <FaArrowLeft />
+          </Button>
+          <h1 className="text-2xl font-bold mx-4">Bill</h1>
+        </div>
+        <div className="flex items-center">
+          <Button
+            variant="outline"
+            onClick={() => {
+              // set bill in AppCtx and then redirect to edit page
+              appCtx.setBillCached(bill);
+              router.push(
+                `/bills/${bill.year}_${bill.month}_${bill.flat}/edit`
+              );
+            }}
+            className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
+          >
+            <FaPencil />
+          </Button>
+        </div>
       </div>
     );
   };
@@ -88,6 +107,8 @@ export default function ViewBillPage({
       {bill && (
         <div>
           <p>Flat: {bill.flat}</p>
+          <p>Recorded On: {bill.recordedOn}</p>
+          <p>Guest Name: {bill.guestName}</p>
           <p>Month: {bill.month}</p>
           <p>Year: {bill.year}</p>
           <p>Opening Unit: {bill.openingUnit}</p>
@@ -111,6 +132,7 @@ export default function ViewBillPage({
           <p>Grand Total: {bill.grandTotal}</p>
         </div>
       )}
+      <PdfBill bill={{ ...bill, flat: `${bill.flat} & C` }} />
     </div>
   );
 }

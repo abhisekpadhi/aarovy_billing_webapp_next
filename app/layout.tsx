@@ -27,14 +27,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [bills, setBills] = useState<AppCtxType["bills"]>([]);
+  const [bills, setBills] = useState<AppCtxType["billCached"]>(null);
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppCtx.Provider value={{ bills, setBills }}>
+        <AppCtx.Provider value={{ billCached: bills, setBillCached: setBills }}>
           <div className="flex flex-col h-screen px-4 py-6">{children}</div>
           <Toaster position="top-center" reverseOrder={false} gutter={8} />
         </AppCtx.Provider>

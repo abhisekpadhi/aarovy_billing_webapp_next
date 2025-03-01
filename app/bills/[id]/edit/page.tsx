@@ -1,27 +1,28 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { FaArrowLeft } from "react-icons/fa6";
+
 import { AppCtx } from "@/app/layout";
 import { FlatSelect } from "@/components/custom/FlatSelect";
 import {
   MonthSelect,
   YearSelect,
 } from "@/components/custom/MonthAndYearSelect";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { BillType, FlatDetailsType } from "@/lib/models";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { BillType } from "@/lib/models";
 import { toast } from "react-hot-toast";
-import { FaArrowLeft } from "react-icons/fa6";
 
-export default function NewBillPage() {
+export default function EditBillPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const appCtx = useContext(AppCtx);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<BillType>({
-    recordedOn: new Date().toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    }),
-    guestName: "",
     month: "",
     year: "",
     flat: "",
@@ -44,42 +45,42 @@ export default function NewBillPage() {
     arrears: "",
     adjustment: "",
     grandTotal: "",
+    recordedOn: new Date().toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    }),
+    guestName: "",
   });
 
-  const [flatDetails, setFlatDetails] = useState<FlatDetailsType | null>(null);
-
-  // when flat changes, update guest name
   useEffect(() => {
     (async () => {
-      if (formData.flat === "") {
+      // if bill id is not found, redirect to new bill page
+      const idFromParams = (await params).id;
+      if (!idFromParams) {
+        toast.error("Bill id not found");
+        router.push("/bills");
         return;
       }
-
-      // use from state
-      if (flatDetails) {
-        setFormData((prev) => ({
-          ...prev,
-          guestName: flatDetails[prev.flat]?.guest_name ?? "",
-        }));
+      if (!appCtx) {
+        toast.error("AppCtx does not exist");
+        router.push("/bills");
         return;
       }
+      const [year, month, flat] = idFromParams.split("_");
 
-      // use from gist
-      const flatDetailsResponse = await axios.get("/api/flats");
-
-      setFlatDetails(flatDetailsResponse.data.data);
-      if (flatDetailsResponse.data.data) {
-        setFormData((prev) => ({
-          ...prev,
-          guestName: flatDetailsResponse.data.data[prev.flat]?.guest_name ?? "",
-        }));
+      if (
+        appCtx.billCached?.year === year &&
+        appCtx.billCached?.month === month &&
+        appCtx.billCached?.flat === flat
+      ) {
+        setFormData(appCtx.billCached);
       } else {
-        toast.error("Could not fetch flat details");
+        toast.error("Bill details not found in AppCtx");
+        router.push("/bills");
       }
     })();
-  }, [formData.flat, flatDetails]);
-
-  const [isLoading, setIsLoading] = useState(false);
+  }, [appCtx, params, router]);
 
   // Calculate used unit
   useEffect(() => {
@@ -173,8 +174,6 @@ export default function NewBillPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const appCtx = useContext(AppCtx);
-
   const saveBill = async () => {
     setIsLoading(true);
     try {
@@ -243,19 +242,28 @@ export default function NewBillPage() {
     );
   };
 
-  const router = useRouter();
-
   const header = () => {
     return (
       <div className="flex items-center mb-4">
         <Button
           variant={"default"}
-          onClick={() => router.back()}
+          onClick={() => {
+            (async () => {
+              router.back();
+              //   if (idFromParams) {
+              //     router.push(`/bills/${idFromParams}`);
+              //   }
+              //   if (!idFromParams) {
+              //     toast.error("Bill id not found");
+              //     router.push("/bills");
+              //   }
+            })();
+          }}
           className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
         >
           <FaArrowLeft />
         </Button>
-        <h1 className="text-2xl font-bold mx-4">New Bill</h1>
+        <h1 className="text-2xl font-bold mx-4">Edit Bill</h1>
       </div>
     );
   };
@@ -271,17 +279,6 @@ export default function NewBillPage() {
             onChange={(value) =>
               setFormData((prev) => ({ ...prev, flat: value }))
             }
-          />
-        </div>
-        <div className="my-4 mx-1">
-          <label>Guest name</label>
-          <Input
-            name="guestName"
-            value={formData.guestName}
-            onChange={handleChange}
-            required
-            type="text"
-            inputMode="text"
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -491,7 +488,7 @@ export default function NewBillPage() {
           variant={"default"}
           className="w-full rounded-full"
         >
-          {isLoading ? "Creating..." : "Create Bill"}
+          {isLoading ? "Updating..." : "Update Bill"}
         </Button>
       </form>
     </div>

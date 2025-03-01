@@ -10,7 +10,7 @@ export async function GET(
   try {
     // Get bill ID from URL path
     const id = (await params).id;
-    console.log("Bill id", id);
+    console.debug("Bill id", id);
     if (!id) {
       return NextResponse.json(
         { message: "Bill ID is required", success: false, data: null },

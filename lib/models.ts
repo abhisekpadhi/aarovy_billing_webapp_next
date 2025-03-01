@@ -1,9 +1,11 @@
 export type AppCtxType = {
-  bills: BillType[];
-  setBills: (bills: BillType[]) => void;
+  billCached: BillType | null;
+  setBillCached: (bill: BillType | null) => void;
 };
 
 export type BillType = {
+  recordedOn: string;
+  guestName: string;
   month: string;
   year: string;
   flat: string;
@@ -26,4 +28,11 @@ export type BillType = {
   arrears: string;
   adjustment: string;
   grandTotal: string;
+};
+
+export type FlatDetailsType = {
+  [flat: string]: {
+    rent: number;
+    guest_name: string;
+  };
 };
