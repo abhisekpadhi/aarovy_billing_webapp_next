@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 
 export function MonthSelect(props: {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
 }) {
   return (
@@ -39,7 +39,7 @@ export function MonthSelect(props: {
 }
 
 export function YearSelect(props: {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
 }) {
   const currentYear = new Date().getFullYear();

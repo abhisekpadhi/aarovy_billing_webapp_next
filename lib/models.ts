@@ -1,3 +1,6 @@
+import { createContext } from "react";
+
+export const AppCtx = createContext<AppCtxType | null>(null);
 export type AppCtxType = {
   billCached: BillType | null;
   setBillCached: (bill: BillType | null) => void;

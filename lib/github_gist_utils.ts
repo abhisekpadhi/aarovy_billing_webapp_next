@@ -109,7 +109,7 @@ const updateIndex = async (key: string, value: string) => {
   index[key] = value;
   await updateGistContent(
     INDEX_GIST_ID,
-    JSON.stringify(index),
+    JSON.stringify(index, null, 2),
     INDEX_FILE_NAME
   );
 };

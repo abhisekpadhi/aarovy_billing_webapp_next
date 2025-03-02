@@ -1,5 +1,5 @@
 "use client";
-import { AppCtx } from "@/app/layout";
+import { AppCtx } from "@/lib/models";
 import PdfBill from "@/components/custom/PdfBill";
 import { Button } from "@/components/ui/button";
 import { BillType } from "@/lib/models";
@@ -48,9 +48,9 @@ export default function ViewBillPage({
       console.debug("bill from context", billCached);
 
       if (
-        billCached.year === year &&
-        billCached.month === month &&
-        billCached.flat === flat
+        billCached?.year === year &&
+        billCached?.month === month &&
+        billCached?.flat === flat
       ) {
         setBill(billCached);
       }

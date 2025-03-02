@@ -1,6 +1,6 @@
 "use client";
-import { AppCtx } from "@/app/layout";
 import { Button } from "@/components/ui/button";
+import { AppCtx } from "@/lib/models";
 
 import { Label } from "@/components/ui/label";
 import { BillType } from "@/lib/models";
@@ -11,78 +11,18 @@ import { FaCog } from "react-icons/fa";
 import { FaCalendar, FaPlus } from "react-icons/fa6";
 
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+  MonthSelect,
+  YearSelect,
+} from "@/components/custom/MonthAndYearSelect";
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-export function MonthSelect(props: {
-  value: string | undefined;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <Select value={props.value} onValueChange={props.onChange}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a month" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Months</SelectLabel>
-          <SelectItem value="1">January</SelectItem>
-          <SelectItem value="2">February</SelectItem>
-          <SelectItem value="3">March</SelectItem>
-          <SelectItem value="4">April</SelectItem>
-          <SelectItem value="5">May</SelectItem>
-          <SelectItem value="6">June</SelectItem>
-          <SelectItem value="7">July</SelectItem>
-          <SelectItem value="8">August</SelectItem>
-          <SelectItem value="9">September</SelectItem>
-          <SelectItem value="10">October</SelectItem>
-          <SelectItem value="11">November</SelectItem>
-          <SelectItem value="12">December</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  );
-}
-
-export function YearSelect(props: {
-  value: string | undefined;
-  onChange: (value: string) => void;
-}) {
-  const currentYear = new Date().getFullYear();
-  const years = [currentYear - 1, currentYear, currentYear + 1];
-
-  return (
-    <Select value={props.value} onValueChange={props.onChange}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a year" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Years</SelectLabel>
-          {years.map((year) => (
-            <SelectItem key={year} value={year.toString()}>
-              {year}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  );
-}
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function BillsPage() {
   const appCtx = useContext(AppCtx);
@@ -120,7 +60,6 @@ export default function BillsPage() {
   };
 
   const fetchThisMonthBills = async () => {
-    setIsLoading(true);
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
     await fetchBillsByMonth(currentYear, currentMonth);
@@ -133,8 +72,6 @@ export default function BillsPage() {
   const handleShowBillsDialog = async () => {
     setShowBillsDialog(false);
     await fetchBillsByMonth(year, month);
-    setYear(0);
-    setMonth(0);
   };
 
   if (isLoading) {
