@@ -34,15 +34,12 @@ const createNewGist = async (
 };
 
 const getGistContent = async (gistId: string, fileName: string) => {
-  console.debug("Getting gist content:", gistId, fileName);
   const response = await axios.get(`https://api.github.com/gists/${gistId}`, {
     headers: {
       Authorization: `Bearer ${GITHUB_ACCESS_TOKEN}`,
       Accept: "application/vnd.github.v3+json",
     },
   });
-  console.debug("filename", fileName);
-  console.debug("response of get gist", response.data.files);
 
   const rawUrl = response.data.files[fileName]["raw_url"];
 
