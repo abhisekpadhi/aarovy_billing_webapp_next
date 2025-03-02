@@ -1,12 +1,6 @@
 "use client";
 import { AppCtx, AppCtxType } from "@/lib/models";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider, SignedIn, SignOutButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
@@ -38,11 +32,10 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
             <SignedIn>
-              <UserButton />
+              <div className="text-red-500">
+                <SignOutButton />
+              </div>
             </SignedIn>
           </header>
           <AppCtx.Provider value={ctxValue}>
