@@ -112,7 +112,7 @@ export default function SettingsPage() {
             <Button
               className="w-full mt-4"
               onClick={async () => {
-                await updateFlatDetails(flat, details);
+                await updateFlatDetails();
               }}
             >
               Update
