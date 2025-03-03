@@ -1,8 +1,7 @@
 "use client";
-import { AppCtx } from "@/lib/models";
 import PdfBill from "@/components/custom/PdfBill";
 import { Button } from "@/components/ui/button";
-import { BillType } from "@/lib/models";
+import { AppCtx, BillType } from "@/lib/models";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -102,37 +101,134 @@ export default function ViewBillPage({
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen pb-4">
       {header()}
+      <div className="text-center mb-4">
+        <p>Flat/Meter No. {bill.flat} & C</p>
+        <p>
+          For the month of{" "}
+          {new Date(0, parseInt(bill.month) - 1).toLocaleString("default", {
+            month: "long",
+          })}{" "}
+          {bill.year}, Recorded on dt. {bill.recordedOn}
+        </p>
+        <p>Name of the Guest: {bill.guestName}</p>
+      </div>
       {bill && (
-        <div>
-          <p>Flat: {bill.flat}</p>
-          <p>Recorded On: {bill.recordedOn}</p>
-          <p>Guest Name: {bill.guestName}</p>
-          <p>Month: {bill.month}</p>
-          <p>Year: {bill.year}</p>
-          <p>Opening Unit: {bill.openingUnit}</p>
-          <p>Closing Unit: {bill.closingUnit}</p>
-          <p>Used Unit: {bill.usedUnit}</p>
-          <p>Common Tenants: {bill.commonTenants}</p>
-          <p>Common Opening Unit: {bill.commonOpenUnit}</p>
-          <p>Common Closing Unit: {bill.commonCloseUnit}</p>
-          <p>Common Used Unit: {bill.commonUsedUnit}</p>
-          <p>Chargeable Unit: {bill.chargeableUnit}</p>
-          <p>Main Meter Billed: {bill.mainMeterBilled}</p>
-          <p>Main Meter Consumed Unit: {bill.mainMeterConsumedUnit}</p>
-          <p>Rate Per Unit: {bill.ratePerUnit}</p>
-          <p>Sub Total: {bill.subTotal}</p>
-          <p>Other Misc Charges: {bill.otherMiscCharges}</p>
-          <p>Society Maintenance Charges: {bill.societyMaintenanceCharges}</p>
-          <p>Parking Charges: {bill.parkingCharges}</p>
-          <p>House Rent: {bill.houseRent}</p>
-          <p>Arrears: {bill.arrears}</p>
-          <p>Adjustment: {bill.adjustment}</p>
-          <p>Grand Total: {bill.grandTotal}</p>
-        </div>
+        <table className="w-full border-collapse border">
+          <thead>
+            <tr>
+              <th className="border p-2 text-center w-3/4">Description</th>
+              <th className="border p-2 text-center w-1/4">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* <tr>
+              <td className="border p-2">Flat</td>
+              <td className="border p-2 text-right">{bill.flat}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Recorded On</td>
+              <td className="border p-2 text-right">{bill.recordedOn}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Guest Name</td>
+              <td className="border p-2 text-right">{bill.guestName}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Month</td>
+              <td className="border p-2 text-right">{bill.month}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Year</td>
+              <td className="border p-2 text-right">{bill.year}</td>
+            </tr> */}
+            <tr>
+              <td className="border p-2">Opening Unit</td>
+              <td className="border p-2 text-right">{bill.openingUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Closing Unit</td>
+              <td className="border p-2 text-right">{bill.closingUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Used Unit</td>
+              <td className="border p-2 text-right">{bill.usedUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Common Tenants</td>
+              <td className="border p-2 text-right">{bill.commonTenants}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Common Opening Unit</td>
+              <td className="border p-2 text-right">{bill.commonOpenUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Common Closing Unit</td>
+              <td className="border p-2 text-right">{bill.commonCloseUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Common Used Unit</td>
+              <td className="border p-2 text-right">{bill.commonUsedUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Chargeable Unit</td>
+              <td className="border p-2 text-right">{bill.chargeableUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Main Meter Billed</td>
+              <td className="border p-2 text-right">{bill.mainMeterBilled}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Main Meter Consumed Unit</td>
+              <td className="border p-2 text-right">
+                {bill.mainMeterConsumedUnit}
+              </td>
+            </tr>
+            <tr>
+              <td className="border p-2">Rate Per Unit</td>
+              <td className="border p-2 text-right">{bill.ratePerUnit}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Sub Total</td>
+              <td className="border p-2 text-right">{bill.subTotal}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Other Misc Charges</td>
+              <td className="border p-2 text-right">{bill.otherMiscCharges}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Society Maintenance Charges</td>
+              <td className="border p-2 text-right">
+                {bill.societyMaintenanceCharges}
+              </td>
+            </tr>
+            <tr>
+              <td className="border p-2">Parking Charges</td>
+              <td className="border p-2 text-right">{bill.parkingCharges}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">House Rent</td>
+              <td className="border p-2 text-right">{bill.houseRent}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Arrears</td>
+              <td className="border p-2 text-right">{bill.arrears}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Adjustment</td>
+              <td className="border p-2 text-right">{bill.adjustment}</td>
+            </tr>
+            <tr>
+              <td className="border p-2">Grand Total</td>
+              <td className="border p-2 text-right">{bill.grandTotal}</td>
+            </tr>
+          </tbody>
+        </table>
       )}
-      <PdfBill bill={{ ...bill, flat: `${bill.flat} & C` }} />
+      <div className="mt-4 pb-4">
+        <PdfBill bill={{ ...bill, flat: `${bill.flat} & C` }} />
+      </div>
     </div>
   );
 }

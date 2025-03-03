@@ -59,6 +59,7 @@ export default function NewBillPage() {
         setFormData((prev) => ({
           ...prev,
           guestName: flatDetails[prev.flat]?.guest_name ?? "",
+          houseRent: flatDetails[prev.flat]?.rent.toString() ?? "",
         }));
         return;
       }
@@ -71,6 +72,8 @@ export default function NewBillPage() {
         setFormData((prev) => ({
           ...prev,
           guestName: flatDetailsResponse.data.data[prev.flat]?.guest_name ?? "",
+          houseRent:
+            flatDetailsResponse.data.data[prev.flat]?.rent.toString() ?? "",
         }));
       } else {
         toast.error("Could not fetch flat details");
