@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { APICalls } from "@/lib/api";
 
 export default function BillsPage() {
   const appCtx = useContext(AppCtx);
@@ -41,22 +42,23 @@ export default function BillsPage() {
   const [month, setMonth] = useState(0);
 
   const fetchBillsByMonth = async (year: number, month: number) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/bills?year=${year}&month=${month}`);
-      const data = await response.json();
-      if (data.success) {
-        setBills(data.data);
-      } else {
-        console.error(data.message);
-        toast.error(data.message);
+    APICalls.fetchBillsByMonth(
+      year,
+      month,
+      () => {
+        setIsLoading(true);
+      },
+      (data) => {
+        setBills(data);
+      },
+      (error) => {
+        console.error(error);
+        toast.error("Error fetching bills");
+      },
+      () => {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Error fetching bills");
-    } finally {
-      setIsLoading(false);
-    }
+    );
   };
 
   const fetchThisMonthBills = async () => {

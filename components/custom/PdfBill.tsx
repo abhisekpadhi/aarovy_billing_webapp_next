@@ -23,6 +23,7 @@ _pdfMake.fonts = {
 export function generateBillPDF(data: BillType) {
   // Define the document structure
   const docDefinition = {
+    pageMargins: [40, 20, 40, 20], // [left, top, right, bottom]
     content: [
       {
         text: "AAROVY",
@@ -51,93 +52,165 @@ export function generateBillPDF(data: BillType) {
       {
         table: {
           headerRows: 0,
-          widths: ["75%", "25%"],
+          widths: ["8%", "70%", "22%"],
           body: [
             [
+              { text: "", alignment: "center", bold: true },
               { text: "Description", alignment: "center", bold: true },
-              { text: "Value", alignment: "center", bold: true },
+              { text: "Value (₹)", alignment: "center", bold: true },
             ],
             [
-              "A. Opening unit",
-              { text: data.openingUnit.toString(), alignment: "right" },
+              { text: "A", margin: [0, 2], alignment: "center" },
+              { text: `Opening unit: ${data.openingUnit}`, margin: [0, 2] },
+              { text: "", margin: [0, 2] },
             ],
             [
-              "B. Closing unit",
-              { text: data.closingUnit.toString(), alignment: "right" },
+              { text: "B", margin: [0, 2], alignment: "center" },
+              { text: `Closing unit: ${data.closingUnit}`, margin: [0, 2] },
+              { text: "", margin: [0, 2] },
             ],
             [
-              "C. Used unit",
-              { text: data.usedUnit.toString(), alignment: "right" },
+              { text: "C", margin: [0, 2], alignment: "center" },
+              { text: `Used unit: ${data.usedUnit}`, margin: [0, 2] },
+              { text: "", margin: [0, 2] },
             ],
             [
-              "D. Common tenants",
-              { text: data.commonTenants.toString(), alignment: "right" },
+              { text: "D", margin: [0, 2], alignment: "center" },
+              { text: `Common tenants: ${data.commonTenants}`, margin: [0, 2] },
+              { text: "", margin: [0, 2] },
             ],
             [
-              "E. Common open unit",
-              { text: data.commonOpenUnit.toString(), alignment: "right" },
-            ],
-            [
-              "F. Common close unit",
-              { text: data.commonCloseUnit.toString(), alignment: "right" },
-            ],
-            [
-              "G. Common used unit ((F-E)/D)",
-              { text: data.commonUsedUnit.toString(), alignment: "right" },
-            ],
-            [
-              "H. Chargeable unit (C+G)",
-              { text: data.chargeableUnit.toString(), alignment: "right" },
-            ],
-            [
-              "I. Main meter billed",
-              { text: data.mainMeterBilled.toString(), alignment: "right" },
-            ],
-            [
-              "J. Main meter consumed unit",
+              { text: "E", margin: [0, 2], alignment: "center" },
               {
-                text: data.mainMeterConsumedUnit.toString(),
+                text: `Common open unit: ${data.commonOpenUnit}`,
+                margin: [0, 2],
+              },
+              { text: "", margin: [0, 2] },
+            ],
+            [
+              { text: "F", margin: [0, 2], alignment: "center" },
+              {
+                text: `Common close unit ${data.commonCloseUnit}`,
+                margin: [0, 2],
+              },
+              { text: "", margin: [0, 2] },
+            ],
+            [
+              { text: "G", margin: [0, 2], alignment: "center" },
+              {
+                text: `Common used unit ((F-E)/D): ${data.commonUsedUnit}`,
+                margin: [0, 2],
+              },
+              { text: "", margin: [0, 2] },
+            ],
+            [
+              { text: "H", margin: [0, 2], alignment: "center" },
+              {
+                text: `Chargeable unit (C+G): ${data.chargeableUnit}`,
+                margin: [0, 2],
+              },
+              { text: "", margin: [0, 2] },
+            ],
+            [
+              { text: "I", margin: [0, 2], alignment: "center" },
+              {
+                text: `Main meter billed: ${data.mainMeterBilled}`,
+                margin: [0, 2],
+              },
+              { text: "", margin: [0, 2] },
+            ],
+            [
+              { text: "J", margin: [0, 2], alignment: "center" },
+              {
+                text: `Main meter consumed unit: ${data.mainMeterConsumedUnit}`,
+                margin: [0, 2],
+              },
+              { text: "", margin: [0, 2] },
+            ],
+            [
+              { text: "K", margin: [0, 2], alignment: "center" },
+              { text: "Rate per unit (I/J)", margin: [0, 2] },
+              {
+                text: data.ratePerUnit.toString(),
                 alignment: "right",
+                margin: [0, 2],
               },
             ],
             [
-              "K. Rate per unit (I/J)",
-              { text: data.ratePerUnit.toString(), alignment: "right" },
-            ],
-            [
-              "L. Subtotal (I+J+K)",
-              { text: data.subTotal.toString(), alignment: "right" },
-            ],
-            [
-              "M. Other misc. charges",
-              { text: data.otherMiscCharges.toString(), alignment: "right" },
-            ],
-            [
-              "N. Society maintenance charges",
+              { text: "L", margin: [0, 2], alignment: "center" },
+              { text: "Subtotal (I+J+K)", margin: [0, 2] },
               {
-                text: data.societyMaintenanceCharges.toString(),
+                text: data.subTotal.toString(),
                 alignment: "right",
+                margin: [0, 2],
               },
             ],
             [
-              "O. Parking charges",
-              { text: data.parkingCharges.toString(), alignment: "right" },
+              { text: "M", margin: [0, 2], alignment: "center" },
+              { text: "Other misc. charges", margin: [0, 2] },
+              {
+                text: Number(data.otherMiscCharges).toFixed(2),
+                alignment: "right",
+                margin: [0, 2],
+              },
             ],
             [
-              "P. House rent for month",
-              { text: data.houseRent.toString(), alignment: "right" },
+              { text: "N", margin: [0, 2], alignment: "center" },
+              { text: "Society maintenance charges", margin: [0, 2] },
+              {
+                text: Number(data.societyMaintenanceCharges).toFixed(2),
+                alignment: "right",
+                margin: [0, 2],
+              },
             ],
             [
-              "Q. Arrears",
-              { text: data.arrears.toString(), alignment: "right" },
+              { text: "O", margin: [0, 2], alignment: "center" },
+              { text: "Parking charges", margin: [0, 2] },
+              {
+                text: Number(data.parkingCharges).toFixed(2),
+                alignment: "right",
+                margin: [0, 2],
+              },
             ],
             [
-              "R. Adjustment",
-              { text: data.adjustment.toString(), alignment: "right" },
+              { text: "P", margin: [0, 2], alignment: "center" },
+              {
+                text: `House rent for month ${data.month}/${data.year}`,
+                margin: [0, 2],
+              },
+              {
+                text: Number(data.houseRent).toFixed(2),
+                alignment: "right",
+                margin: [0, 2],
+              },
             ],
             [
-              "S. Grand total (L+M+N+O+P+Q+H)",
-              { text: data.grandTotal.toString(), alignment: "right" },
+              { text: "Q", margin: [0, 2], alignment: "center" },
+              { text: "Arrears", margin: [0, 2] },
+              {
+                text: Number(data.arrears).toFixed(2),
+                alignment: "right",
+                margin: [0, 2],
+              },
+            ],
+            [
+              { text: "R", margin: [0, 2], alignment: "center" },
+              { text: "Adjustment", margin: [0, 2] },
+              {
+                text: Number(data.adjustment).toFixed(2),
+                alignment: "right",
+                margin: [0, 2],
+              },
+            ],
+            [
+              { text: "S", margin: [0, 2], alignment: "center" },
+              { text: "Grand total (L+M+N+O+P+Q+H)", margin: [0, 2] },
+              {
+                text: data.grandTotal.toString(),
+                alignment: "right",
+                margin: [0, 2],
+                bold: true,
+              },
             ],
           ],
         },
@@ -188,14 +261,6 @@ export function generateBillPDF(data: BillType) {
 export default function BillsPDFPage(props: { bill: BillType }) {
   return (
     <div className="mt-2">
-      {/* <Button
-        onClick={() => {
-          // Test PDF generation
-          generateBillPDF(props.bill).download();
-        }}
-      >
-        Generate PDF
-      </Button> */}
       <Button
         className="w-full"
         onClick={() => {

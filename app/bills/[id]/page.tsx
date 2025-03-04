@@ -118,110 +118,138 @@ export default function ViewBillPage({
         <table className="w-full border-collapse border">
           <thead>
             <tr>
-              <th className="border p-2 text-center w-3/4">Description</th>
-              <th className="border p-2 text-center w-1/4">Value</th>
+              <th className="border p-2 text-center w-[5%]"></th>
+              <th className="border p-2 text-center w-[60%]">Description</th>
+              <th className="border p-2 text-center w-[35%]">Value</th>
             </tr>
           </thead>
           <tbody>
-            {/* <tr>
-              <td className="border p-2">Flat</td>
-              <td className="border p-2 text-right">{bill.flat}</td>
+            <tr>
+              <td className="border p-2 text-center">A</td>
+              <td className="border p-2">Opening Unit: {bill.openingUnit}</td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Recorded On</td>
-              <td className="border p-2 text-right">{bill.recordedOn}</td>
+              <td className="border p-2 text-center">B</td>
+              <td className="border p-2">Closing Unit: {bill.closingUnit}</td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Guest Name</td>
-              <td className="border p-2 text-right">{bill.guestName}</td>
+              <td className="border p-2 text-center">C</td>
+              <td className="border p-2">Used Unit: {bill.usedUnit}</td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Month</td>
-              <td className="border p-2 text-right">{bill.month}</td>
+              <td className="border p-2 text-center">D</td>
+              <td className="border p-2">
+                Common Tenants: {bill.commonTenants}
+              </td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Year</td>
-              <td className="border p-2 text-right">{bill.year}</td>
-            </tr> */}
-            <tr>
-              <td className="border p-2">Opening Unit</td>
-              <td className="border p-2 text-right">{bill.openingUnit}</td>
+              <td className="border p-2 text-center">E</td>
+              <td className="border p-2">
+                Common Opening Unit: {bill.commonOpenUnit}
+              </td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Closing Unit</td>
-              <td className="border p-2 text-right">{bill.closingUnit}</td>
+              <td className="border p-2 text-center">F</td>
+              <td className="border p-2">
+                Common Closing Unit: {bill.commonCloseUnit}
+              </td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Used Unit</td>
-              <td className="border p-2 text-right">{bill.usedUnit}</td>
+              <td className="border p-2 text-center">G</td>
+              <td className="border p-2">
+                Common Used Unit: {bill.commonUsedUnit}
+              </td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Common Tenants</td>
-              <td className="border p-2 text-right">{bill.commonTenants}</td>
+              <td className="border p-2 text-center">H</td>
+              <td className="border p-2">
+                Chargeable Unit: {bill.chargeableUnit}
+              </td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Common Opening Unit</td>
-              <td className="border p-2 text-right">{bill.commonOpenUnit}</td>
+              <td className="border p-2 text-center">I</td>
+              <td className="border p-2">
+                Main Meter Billed: {bill.mainMeterBilled}
+              </td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Common Closing Unit</td>
-              <td className="border p-2 text-right">{bill.commonCloseUnit}</td>
+              <td className="border p-2 text-center">J</td>
+              <td className="border p-2">
+                Main Meter Consumed Unit: {bill.mainMeterConsumedUnit}
+              </td>
+              <td className="border p-2 text-right"></td>
             </tr>
             <tr>
-              <td className="border p-2">Common Used Unit</td>
-              <td className="border p-2 text-right">{bill.commonUsedUnit}</td>
-            </tr>
-            <tr>
-              <td className="border p-2">Chargeable Unit</td>
-              <td className="border p-2 text-right">{bill.chargeableUnit}</td>
-            </tr>
-            <tr>
-              <td className="border p-2">Main Meter Billed</td>
-              <td className="border p-2 text-right">{bill.mainMeterBilled}</td>
-            </tr>
-            <tr>
-              <td className="border p-2">Main Meter Consumed Unit</td>
+              <td className="border p-2 text-center">K</td>
+              <td className="border p-2">Rate Per Unit</td>
               <td className="border p-2 text-right">
-                {bill.mainMeterConsumedUnit}
+                {Number(bill.ratePerUnit).toFixed(2)}
               </td>
             </tr>
             <tr>
-              <td className="border p-2">Rate Per Unit</td>
-              <td className="border p-2 text-right">{bill.ratePerUnit}</td>
-            </tr>
-            <tr>
+              <td className="border p-2 text-center">L</td>
               <td className="border p-2">Sub Total</td>
-              <td className="border p-2 text-right">{bill.subTotal}</td>
+              <td className="border p-2 text-right">
+                {Number(bill.subTotal).toFixed(2)}
+              </td>
             </tr>
             <tr>
+              <td className="border p-2 text-center">M</td>
               <td className="border p-2">Other Misc Charges</td>
-              <td className="border p-2 text-right">{bill.otherMiscCharges}</td>
+              <td className="border p-2 text-right">
+                {Number(bill.otherMiscCharges).toFixed(2)}
+              </td>
             </tr>
             <tr>
+              <td className="border p-2 text-center">N</td>
               <td className="border p-2">Society Maintenance Charges</td>
               <td className="border p-2 text-right">
-                {bill.societyMaintenanceCharges}
+                {Number(bill.societyMaintenanceCharges).toFixed(2)}
               </td>
             </tr>
             <tr>
+              <td className="border p-2 text-center">O</td>
               <td className="border p-2">Parking Charges</td>
-              <td className="border p-2 text-right">{bill.parkingCharges}</td>
+              <td className="border p-2 text-right">
+                {Number(bill.parkingCharges).toFixed(2)}
+              </td>
             </tr>
             <tr>
+              <td className="border p-2 text-center">P</td>
               <td className="border p-2">House Rent</td>
-              <td className="border p-2 text-right">{bill.houseRent}</td>
+              <td className="border p-2 text-right">
+                {Number(bill.houseRent).toFixed(2)}
+              </td>
             </tr>
             <tr>
+              <td className="border p-2 text-center">Q</td>
               <td className="border p-2">Arrears</td>
-              <td className="border p-2 text-right">{bill.arrears}</td>
+              <td className="border p-2 text-right">
+                {Number(bill.arrears).toFixed(2)}
+              </td>
             </tr>
             <tr>
+              <td className="border p-2 text-center">R</td>
               <td className="border p-2">Adjustment</td>
-              <td className="border p-2 text-right">{bill.adjustment}</td>
+              <td className="border p-2 text-right">
+                {Number(bill.adjustment).toFixed(2)}
+              </td>
             </tr>
             <tr>
+              <td className="border p-2 text-center">S</td>
               <td className="border p-2">Grand Total</td>
-              <td className="border p-2 text-right">{bill.grandTotal}</td>
+              <td className="border p-2 text-right font-bold">
+                {Number(bill.grandTotal).toFixed(2)}
+              </td>
             </tr>
           </tbody>
         </table>

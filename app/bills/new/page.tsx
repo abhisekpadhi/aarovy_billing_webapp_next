@@ -1,4 +1,5 @@
 "use client";
+import { DatePicker } from "@/components/custom/DatePicker";
 import { FlatSelect } from "@/components/custom/FlatSelect";
 import {
   MonthSelect,
@@ -6,6 +7,7 @@ import {
 } from "@/components/custom/MonthAndYearSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { APICalls } from "@/lib/api";
 import { AppCtx, BillType, FlatDetailsType } from "@/lib/models";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -15,11 +17,7 @@ import { FaArrowLeft } from "react-icons/fa6";
 
 export default function NewBillPage() {
   const [formData, setFormData] = useState<BillType>({
-    recordedOn: new Date().toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    }),
+    recordedOn: "",
     guestName: "",
     month: "",
     year: "",
@@ -27,7 +25,7 @@ export default function NewBillPage() {
     openingUnit: "",
     closingUnit: "",
     usedUnit: "",
-    commonTenants: "",
+    commonTenants: "1",
     commonOpenUnit: "",
     commonCloseUnit: "",
     commonUsedUnit: "",
@@ -36,16 +34,70 @@ export default function NewBillPage() {
     mainMeterConsumedUnit: "",
     ratePerUnit: "",
     subTotal: "",
-    otherMiscCharges: "",
-    societyMaintenanceCharges: "",
-    parkingCharges: "",
+    otherMiscCharges: "0",
+    societyMaintenanceCharges: "0",
+    parkingCharges: "0",
     houseRent: "",
-    arrears: "",
-    adjustment: "",
+    arrears: "0",
+    adjustment: "0",
     grandTotal: "",
   });
 
   const [flatDetails, setFlatDetails] = useState<FlatDetailsType | null>(null);
+  const [fetchingPreviousMonth, setFetchingPreviousMonth] = useState(false);
+
+  // when month & year changes, fetch the previous month data, if it exists the flat, pick the closing unit, it will be used as opening unit
+  useEffect(() => {
+    (async () => {
+      if (
+        formData.month !== "" &&
+        formData.year !== "" &&
+        formData.flat !== ""
+      ) {
+        // Calculate previous month and year
+        const prevMonth =
+          formData.month === "1"
+            ? "12"
+            : (parseInt(formData.month) - 1).toString();
+        const prevYear =
+          formData.month === "1"
+            ? (parseInt(formData.year) - 1).toString()
+            : formData.year;
+
+        console.log("fetching previous month", prevYear, prevMonth);
+
+        APICalls.fetchBillsByMonth(
+          parseInt(prevYear),
+          parseInt(prevMonth),
+          () => {
+            setFetchingPreviousMonth(true);
+          },
+          (data: BillType[]) => {
+            console.log("previous month data", data);
+            if (data.length > 0) {
+              const matchingBill = data.find(
+                (bill) => bill.flat === formData.flat
+              );
+              if (!matchingBill) {
+                toast("No bill found for the previous month");
+              }
+              setFormData((prev) => ({
+                ...prev,
+                openingUnit: matchingBill?.closingUnit ?? "",
+              }));
+            }
+          },
+          (error) => {
+            console.error(error);
+            toast.error("Error fetching previous month data");
+          },
+          () => {
+            setFetchingPreviousMonth(false);
+          }
+        );
+      }
+    })();
+  }, [formData.month, formData.year, formData.flat]);
 
   // when flat changes, update guest name
   useEffect(() => {
@@ -210,11 +262,12 @@ export default function NewBillPage() {
 
     console.debug("formData in handleSubmit", formData);
 
-    // Flat, Month, Year are required fields
+    // Flat, Month, Year, Recorded On are required fields
     const missingFields = [];
     if (!formData.flat) missingFields.push("flat");
     if (!formData.month) missingFields.push("month");
     if (!formData.year) missingFields.push("year");
+    if (formData.recordedOn === "") missingFields.push("recordedOn");
 
     if (missingFields.length > 0) {
       toast(`Please select ${missingFields.join(", ")}`, {
@@ -306,17 +359,45 @@ export default function NewBillPage() {
             />
           </div>
         </div>
+
+        <div className="my-4 mx-1">
+          <label>Recorded On</label>
+          <div>
+            <DatePicker
+              init={
+                formData.recordedOn === ""
+                  ? undefined
+                  : new Date(formData.recordedOn)
+              }
+              setDate={(date) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  recordedOn: date.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }),
+                }))
+              }
+            />
+          </div>
+        </div>
+
         <div className="my-4 mx-1">
           <label>Opening Unit</label>
-          <Input
-            name="openingUnit"
-            value={formData.openingUnit}
-            onChange={handleChange}
-            required
-            type="number"
-            inputMode="numeric"
-            pattern="[0-9]*"
-          />
+          {fetchingPreviousMonth ? (
+            <div>Loading...</div>
+          ) : (
+            <Input
+              name="openingUnit"
+              value={formData.openingUnit}
+              onChange={handleChange}
+              required
+              type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
+            />
+          )}
         </div>
         <div className="my-4 mx-1">
           <label>Closing Unit</label>

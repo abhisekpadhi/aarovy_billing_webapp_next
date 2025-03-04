@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa6";
 
-import { AppCtx } from "@/lib/models";
+import { DatePicker } from "@/components/custom/DatePicker";
 import { FlatSelect } from "@/components/custom/FlatSelect";
 import {
   MonthSelect,
   YearSelect,
 } from "@/components/custom/MonthAndYearSelect";
-import { BillType } from "@/lib/models";
+import { AppCtx, BillType } from "@/lib/models";
 import { toast } from "react-hot-toast";
 
 export default function EditBillPage({
@@ -23,13 +23,15 @@ export default function EditBillPage({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<BillType>({
+    recordedOn: "",
+    guestName: "",
     month: "",
     year: "",
     flat: "",
     openingUnit: "",
     closingUnit: "",
     usedUnit: "",
-    commonTenants: "",
+    commonTenants: "1",
     commonOpenUnit: "",
     commonCloseUnit: "",
     commonUsedUnit: "",
@@ -38,23 +40,21 @@ export default function EditBillPage({
     mainMeterConsumedUnit: "",
     ratePerUnit: "",
     subTotal: "",
-    otherMiscCharges: "",
-    societyMaintenanceCharges: "",
-    parkingCharges: "",
+    otherMiscCharges: "0",
+    societyMaintenanceCharges: "0",
+    parkingCharges: "0",
     houseRent: "",
-    arrears: "",
-    adjustment: "",
+    arrears: "0",
+    adjustment: "0",
     grandTotal: "",
-    recordedOn: new Date().toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    }),
-    guestName: "",
   });
 
+  const [loading, setLoading] = useState(true);
+
+  // Fetch bill details
   useEffect(() => {
     (async () => {
+      setLoading(true);
       // if bill id is not found, redirect to new bill page
       const idFromParams = (await params).id;
       if (!idFromParams) {
@@ -74,11 +74,13 @@ export default function EditBillPage({
         appCtx.billCached?.month === month &&
         appCtx.billCached?.flat === flat
       ) {
+        console.debug("Bill details found in AppCtx", appCtx.billCached);
         setFormData(appCtx.billCached);
       } else {
         toast.error("Bill details not found in AppCtx");
         router.push("/bills");
       }
+      setLoading(false);
     })();
   }, [appCtx, params, router]);
 
@@ -250,13 +252,6 @@ export default function EditBillPage({
           onClick={() => {
             (async () => {
               router.back();
-              //   if (idFromParams) {
-              //     router.push(`/bills/${idFromParams}`);
-              //   }
-              //   if (!idFromParams) {
-              //     toast.error("Bill id not found");
-              //     router.push("/bills");
-              //   }
             })();
           }}
           className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
@@ -267,6 +262,12 @@ export default function EditBillPage({
       </div>
     );
   };
+
+  console.debug("recordedOn in EditBillPage", formData.recordedOn);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -297,6 +298,24 @@ export default function EditBillPage({
               value={formData.year}
               onChange={(value) =>
                 setFormData((prev) => ({ ...prev, year: value }))
+              }
+            />
+          </div>
+        </div>
+        <div className="my-4 mx-1">
+          <label>Recorded On</label>
+          <div>
+            <DatePicker
+              init={formData.recordedOn}
+              setDate={(date) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  recordedOn: date.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }),
+                }))
               }
             />
           </div>
