@@ -364,11 +364,7 @@ export default function NewBillPage() {
           <label>Recorded On</label>
           <div>
             <DatePicker
-              init={
-                formData.recordedOn === ""
-                  ? undefined
-                  : new Date(formData.recordedOn)
-              }
+              init={formData.recordedOn}
               setDate={(date) =>
                 setFormData((prev) => ({
                   ...prev,

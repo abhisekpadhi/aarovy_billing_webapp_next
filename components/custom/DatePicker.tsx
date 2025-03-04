@@ -35,8 +35,6 @@ export function DatePicker(props: {
     setOpen(false);
   };
 
-  console.debug("date in DatePicker", props.init, date);
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
