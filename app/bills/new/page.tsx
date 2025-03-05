@@ -547,7 +547,7 @@ export default function NewBillPage() {
             required
             type="number"
             inputMode="numeric"
-            pattern="[0-9]*"
+            pattern="-?[0-9]*"
           />
         </div>
         <div className="my-4 mx-1">
