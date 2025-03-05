@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { BillType } from "@/lib/models";
+import { MonthNumberToName } from "@/lib/utils";
 import pdfMake from "pdfmake";
 import { FaRegFilePdf } from "react-icons/fa6";
 
@@ -32,20 +33,17 @@ export function generateBillPDF(data: BillType) {
         bold: true,
       },
       {
-        text: `Flat/Meter No.: ${data.flat}`,
+        text: `Flat/Meter No.: ${data.flat}, Guest: ${data.guestName}`,
         alignment: "center",
         margin: [0, 5],
       },
       {
         text: [
-          `For the month of ${data.month} ${data.year}, `,
+          `For the month of ${MonthNumberToName(parseInt(data.month))} ${
+            data.year
+          }, `,
           `Recorded on dt. ${data.recordedOn}`,
         ],
-        alignment: "center",
-        margin: [0, 5],
-      },
-      {
-        text: `Name of the Guest: ${data.guestName}`,
         alignment: "center",
         margin: [0, 5],
       },
@@ -175,7 +173,9 @@ export function generateBillPDF(data: BillType) {
             [
               { text: "P", margin: [0, 2], alignment: "center" },
               {
-                text: `House rent for month ${data.month}/${data.year}`,
+                text: `House rent for month ${MonthNumberToName(
+                  parseInt(data.month)
+                )} ${data.year}`,
                 margin: [0, 2],
               },
               {
@@ -186,7 +186,10 @@ export function generateBillPDF(data: BillType) {
             ],
             [
               { text: "Q", margin: [0, 2], alignment: "center" },
-              { text: "Arrears", margin: [0, 2] },
+              {
+                text: ["Arrears", data.arrearsDescription].join("\n"),
+                margin: [0, 2],
+              },
               {
                 text: Number(data.arrears).toFixed(2),
                 alignment: "right",
@@ -195,7 +198,10 @@ export function generateBillPDF(data: BillType) {
             ],
             [
               { text: "R", margin: [0, 2], alignment: "center" },
-              { text: "Adjustment", margin: [0, 2] },
+              {
+                text: ["Adjustment", data.adjustmentDescription].join("\n"),
+                margin: [0, 2],
+              },
               {
                 text: Number(data.adjustment).toFixed(2),
                 alignment: "right",
@@ -210,6 +216,8 @@ export function generateBillPDF(data: BillType) {
                 alignment: "right",
                 margin: [0, 2],
                 bold: true,
+                fillColor: "#000000",
+                color: "#FFFFFF",
               },
             ],
           ],

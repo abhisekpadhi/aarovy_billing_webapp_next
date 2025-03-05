@@ -29,7 +29,9 @@ export type BillType = {
   parkingCharges: string;
   houseRent: string;
   arrears: string;
+  arrearsDescription: string;
   adjustment: string;
+  adjustmentDescription: string;
   grandTotal: string;
 };
 

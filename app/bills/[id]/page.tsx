@@ -232,14 +232,23 @@ export default function ViewBillPage({
             </tr>
             <tr>
               <td className="border p-2 text-center">Q</td>
-              <td className="border p-2">Arrears</td>
+              <td className="border p-2">
+                Arrears
+                <br />
+                <span className="text-sm">{bill.arrearsDescription}</span>
+              </td>
+
               <td className="border p-2 text-right">
                 {Number(bill.arrears).toFixed(2)}
               </td>
             </tr>
             <tr>
               <td className="border p-2 text-center">R</td>
-              <td className="border p-2">Adjustment</td>
+              <td className="border p-2">
+                Adjustment
+                <br />
+                <span className="text-sm">{bill.adjustmentDescription}</span>
+              </td>
               <td className="border p-2 text-right">
                 {Number(bill.adjustment).toFixed(2)}
               </td>

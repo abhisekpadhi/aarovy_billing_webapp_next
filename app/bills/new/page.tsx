@@ -39,7 +39,9 @@ export default function NewBillPage() {
     parkingCharges: "0",
     houseRent: "",
     arrears: "0",
+    arrearsDescription: "",
     adjustment: "0",
+    adjustmentDescription: "",
     grandTotal: "",
   });
 
@@ -549,6 +551,17 @@ export default function NewBillPage() {
           />
         </div>
         <div className="my-4 mx-1">
+          <label>Arrears Description</label>
+          <Input
+            name="arrearsDescription"
+            value={formData.arrearsDescription}
+            onChange={handleChange}
+            required
+            type="text"
+            inputMode="text"
+          />
+        </div>
+        <div className="my-4 mx-1">
           <label>Adjustment</label>
           <Input
             name="adjustment"
@@ -558,6 +571,17 @@ export default function NewBillPage() {
             type="number"
             inputMode="numeric"
             pattern="-?[0-9]*"
+          />
+        </div>
+        <div className="my-4 mx-1">
+          <label>Adjustment Description</label>
+          <Input
+            name="adjustmentDescription"
+            value={formData.adjustmentDescription}
+            onChange={handleChange}
+            required
+            type="text"
+            inputMode="text"
           />
         </div>
         <div className="my-4 mx-1">
