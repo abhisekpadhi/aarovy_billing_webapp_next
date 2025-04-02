@@ -8,12 +8,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { APICalls } from "@/lib/api";
-import { AppCtx, BillType, FlatDetailsType } from "@/lib/models";
+import { AppCtx, BillType, CacheType, FlatDetailsType } from "@/lib/models";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { FaArrowLeft } from "react-icons/fa6";
+
+type BillingContextType = {
+  month: string;
+  year: string;
+  recordedOn: string;
+  commonTenants: string;
+  commonOpenUnit: string;
+  commonCloseUnit: string;
+  mainMeterBilled: string;
+  mainMeterConsumedUnit: string;
+};
 
 export default function NewBillPage() {
   const [formData, setFormData] = useState<BillType>({
@@ -47,6 +58,49 @@ export default function NewBillPage() {
 
   const [flatDetails, setFlatDetails] = useState<FlatDetailsType | null>(null);
   const [fetchingPreviousMonth, setFetchingPreviousMonth] = useState(false);
+
+  // recall
+  const setCache = (key: string, value: CacheType<BillingContextType>) => {
+    const cache = {
+      data: value,
+      expiresAt: Date.now() + 1000 * 60 * 60 * 24, // 1 day
+      createdAt: Date.now(),
+    };
+
+    localStorage.setItem(key, JSON.stringify(cache));
+    console.log("setting cached billing context", cache);
+  };
+
+  const getCache = (key: string) => {
+    const cache = localStorage.getItem(key);
+    if (!cache) return null;
+    const parsedCache = JSON.parse(cache) as CacheType<BillingContextType>;
+    if (parsedCache.expiresAt < Date.now()) {
+      localStorage.removeItem(key);
+      return null;
+    }
+
+    console.log("getting cached billing context", parsedCache);
+    return parsedCache;
+  };
+
+  // recall
+  useEffect(() => {
+    const billingContext = getCache("billingContext");
+    if (billingContext) {
+      setFormData((prev) => ({
+        ...prev,
+        month: billingContext.data.month,
+        year: billingContext.data.year,
+        recordedOn: billingContext.data.recordedOn,
+        commonTenants: billingContext.data.commonTenants,
+        commonOpenUnit: billingContext.data.commonOpenUnit,
+        commonCloseUnit: billingContext.data.commonCloseUnit,
+        mainMeterBilled: billingContext.data.mainMeterBilled,
+        mainMeterConsumedUnit: billingContext.data.mainMeterConsumedUnit,
+      }));
+    }
+  }, []);
 
   // when month & year changes, fetch the previous month data, if it exists the flat, pick the closing unit, it will be used as opening unit
   useEffect(() => {
@@ -249,6 +303,24 @@ export default function NewBillPage() {
           };
           appCtx.setBillCached(updatedBill);
         }
+      }
+      // get cache, if it does not exist, create it
+      const billingContext = getCache("billingContext");
+      if (!billingContext) {
+        setCache("billingContext", {
+          data: {
+            month: formData.month,
+            year: formData.year,
+            recordedOn: formData.recordedOn,
+            commonTenants: formData.commonTenants,
+            commonOpenUnit: formData.commonOpenUnit,
+            commonCloseUnit: formData.commonCloseUnit,
+            mainMeterBilled: formData.mainMeterBilled,
+            mainMeterConsumedUnit: formData.mainMeterConsumedUnit,
+          },
+          expiresAt: Date.now() + 1000 * 60 * 60 * 24, // 1 day
+          createdAt: Date.now(),
+        });
       }
       router.push(`/bills/${id}`);
     } catch (error) {
@@ -556,7 +628,6 @@ export default function NewBillPage() {
             name="arrearsDescription"
             value={formData.arrearsDescription}
             onChange={handleChange}
-            required
             type="text"
             inputMode="text"
           />
@@ -579,7 +650,6 @@ export default function NewBillPage() {
             name="adjustmentDescription"
             value={formData.adjustmentDescription}
             onChange={handleChange}
-            required
             type="text"
             inputMode="text"
           />

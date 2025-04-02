@@ -136,7 +136,7 @@ export function generateBillPDF(data: BillType) {
             ],
             [
               { text: "L", margin: [0, 2], alignment: "center" },
-              { text: "Subtotal (I+J+K)", margin: [0, 2] },
+              { text: "Subtotal (H x K)", margin: [0, 2] },
               {
                 text: data.subTotal.toString(),
                 alignment: "right",
@@ -210,7 +210,7 @@ export function generateBillPDF(data: BillType) {
             ],
             [
               { text: "S", margin: [0, 2], alignment: "center" },
-              { text: "Grand total (L+M+N+O+P+Q+H)", margin: [0, 2] },
+              { text: "Grand total (L+M+N+O+P+Q+R)", margin: [0, 2] },
               {
                 text: data.grandTotal.toString(),
                 alignment: "right",

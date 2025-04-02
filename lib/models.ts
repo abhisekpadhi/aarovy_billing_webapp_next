@@ -41,3 +41,9 @@ export type FlatDetailsType = {
     guest_name: string;
   };
 };
+
+export type CacheType<T> = {
+  data: T;
+  expiresAt: number;
+  createdAt: number;
+};
