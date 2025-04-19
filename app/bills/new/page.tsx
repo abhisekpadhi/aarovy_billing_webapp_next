@@ -64,7 +64,7 @@ export default function NewBillPage() {
 	// recall
 	const setCache = (key: string, value: CacheType<BillingContextType>) => {
 		localStorage.setItem(key, JSON.stringify(value));
-		console.log('setting cached billing context', cache);
+		console.log('setting cached billing context', JSON.stringify(value));
 	};
 
 	const getCache = (key: string) => {
