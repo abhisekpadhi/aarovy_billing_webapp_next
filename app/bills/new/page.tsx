@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { APICalls } from '@/lib/api';
 import { AppCtx, BillType, CacheType, FlatDetailsType } from '@/lib/models';
+import { cn } from '@/lib/utils';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { FaArrowLeft } from 'react-icons/fa6';
+import { FaArrowLeft, FaCheck } from 'react-icons/fa6';
 
 type BillingContextType = {
 	month: string;
@@ -60,6 +61,11 @@ export default function NewBillPage() {
 		null
 	);
 	const [fetchingPreviousMonth, setFetchingPreviousMonth] = useState(false);
+	const [fetchingGuestName, setFetchingGuestName] = useState(false);
+	const [electricityIncludedInRent, setElectricityIncludedInRent] =
+		useState(false);
+	const electricityIncludedInRentRef = useRef(false);
+	electricityIncludedInRentRef.current = electricityIncludedInRent;
 
 	// recall
 	const setCache = (key: string, value: CacheType<BillingContextType>) => {
@@ -104,9 +110,29 @@ export default function NewBillPage() {
 		}
 	}, []);
 
+	// Zero electricity fields when included in rent
+	useEffect(() => {
+		if (!electricityIncludedInRent) return;
+		setFormData((prev) => ({
+			...prev,
+			openingUnit: '0',
+			closingUnit: '0',
+			usedUnit: '0',
+			commonOpenUnit: '0',
+			commonCloseUnit: '0',
+			commonUsedUnit: '0',
+			chargeableUnit: '0',
+			mainMeterBilled: '0',
+			mainMeterConsumedUnit: '0',
+			ratePerUnit: '0',
+			subTotal: '0',
+		}));
+	}, [electricityIncludedInRent]);
+
 	// when month & year changes, fetch the previous month data, if it exists the flat, pick the closing unit, it will be used as opening unit
 	useEffect(() => {
 		(async () => {
+			if (electricityIncludedInRent) return;
 			if (
 				formData.month !== '' &&
 				formData.year !== '' &&
@@ -131,6 +157,7 @@ export default function NewBillPage() {
 						setFetchingPreviousMonth(true);
 					},
 					(data: BillType[]) => {
+						if (electricityIncludedInRentRef.current) return;
 						console.log('previous month data', data);
 						if (data.length > 0) {
 							const matchingBill = data.find(
@@ -157,7 +184,7 @@ export default function NewBillPage() {
 				);
 			}
 		})();
-	}, [formData.month, formData.year, formData.flat]);
+	}, [formData.month, formData.year, formData.flat, electricityIncludedInRent]);
 
 	// when flat changes, update guest name
 	useEffect(() => {
@@ -176,23 +203,31 @@ export default function NewBillPage() {
 				return;
 			}
 
-			// use from gist
-			const flatDetailsResponse = await axios.get('/api/flats');
+			setFetchingGuestName(true);
+			setFormData((prev) => ({ ...prev, guestName: '' }));
+			try {
+				const flatDetailsResponse = await axios.get('/api/flats');
 
-			setFlatDetails(flatDetailsResponse.data.data);
-			if (flatDetailsResponse.data.data) {
-				setFormData((prev) => ({
-					...prev,
-					guestName:
-						flatDetailsResponse.data.data[prev.flat]?.guest_name ??
-						'',
-					houseRent:
-						flatDetailsResponse.data.data[
-							prev.flat
-						]?.rent.toString() ?? '',
-				}));
-			} else {
+				setFlatDetails(flatDetailsResponse.data.data);
+				if (flatDetailsResponse.data.data) {
+					setFormData((prev) => ({
+						...prev,
+						guestName:
+							flatDetailsResponse.data.data[prev.flat]
+								?.guest_name ?? '',
+						houseRent:
+							flatDetailsResponse.data.data[
+								prev.flat
+							]?.rent.toString() ?? '',
+					}));
+				} else {
+					toast.error('Could not fetch flat details');
+				}
+			} catch (error) {
+				console.error(error);
 				toast.error('Could not fetch flat details');
+			} finally {
+				setFetchingGuestName(false);
 			}
 		})();
 	}, [formData.flat, flatDetails]);
@@ -201,14 +236,16 @@ export default function NewBillPage() {
 
 	// Calculate used unit
 	useEffect(() => {
+		if (electricityIncludedInRent) return;
 		const opening = parseFloat(formData.openingUnit) || 0;
 		const closing = parseFloat(formData.closingUnit) || 0;
 		const used = (closing - opening).toString();
 		setFormData((prev) => ({ ...prev, usedUnit: used }));
-	}, [formData.openingUnit, formData.closingUnit]);
+	}, [formData.openingUnit, formData.closingUnit, electricityIncludedInRent]);
 
 	// Calculate common used unit
 	useEffect(() => {
+		if (electricityIncludedInRent) return;
 		const commonOpen = parseFloat(formData.commonOpenUnit) || 0;
 		const commonClose = parseFloat(formData.commonCloseUnit) || 0;
 		const tenants = parseFloat(formData.commonTenants) || 0;
@@ -223,18 +260,21 @@ export default function NewBillPage() {
 		formData.commonOpenUnit,
 		formData.commonCloseUnit,
 		formData.commonTenants,
+		electricityIncludedInRent,
 	]);
 
 	// Calculate chargeable unit
 	useEffect(() => {
+		if (electricityIncludedInRent) return;
 		const used = parseFloat(formData.usedUnit) || 0;
 		const commonUsed = parseFloat(formData.commonUsedUnit) || 0;
 		const chargeable = (used + commonUsed).toFixed(2).toString();
 		setFormData((prev) => ({ ...prev, chargeableUnit: chargeable }));
-	}, [formData.usedUnit, formData.commonUsedUnit]);
+	}, [formData.usedUnit, formData.commonUsedUnit, electricityIncludedInRent]);
 
 	// Calculate rate per unit
 	useEffect(() => {
+		if (electricityIncludedInRent) return;
 		const mainBilled = parseFloat(formData.mainMeterBilled) || 0;
 		const mainConsumed = parseFloat(formData.mainMeterConsumedUnit) || 0;
 
@@ -242,15 +282,24 @@ export default function NewBillPage() {
 			const rate = (mainBilled / mainConsumed).toFixed(2).toString();
 			setFormData((prev) => ({ ...prev, ratePerUnit: rate }));
 		}
-	}, [formData.mainMeterBilled, formData.mainMeterConsumedUnit]);
+	}, [
+		formData.mainMeterBilled,
+		formData.mainMeterConsumedUnit,
+		electricityIncludedInRent,
+	]);
 
 	// Calculate subtotal
 	useEffect(() => {
+		if (electricityIncludedInRent) return;
 		const chargeableUnit = parseFloat(formData.chargeableUnit) || 0;
 		const ratePerUnit = parseFloat(formData.ratePerUnit) || 0;
 		const subtotal = (chargeableUnit * ratePerUnit).toFixed(2).toString();
 		setFormData((prev) => ({ ...prev, subTotal: subtotal }));
-	}, [formData.chargeableUnit, formData.ratePerUnit]);
+	}, [
+		formData.chargeableUnit,
+		formData.ratePerUnit,
+		electricityIncludedInRent,
+	]);
 
 	// Calculate grand total
 	useEffect(() => {
@@ -321,10 +370,18 @@ export default function NewBillPage() {
 						year: formData.year,
 						recordedOn: formData.recordedOn,
 						commonTenants: formData.commonTenants,
-						commonOpenUnit: formData.commonOpenUnit,
-						commonCloseUnit: formData.commonCloseUnit,
-						mainMeterBilled: formData.mainMeterBilled,
-						mainMeterConsumedUnit: formData.mainMeterConsumedUnit,
+						commonOpenUnit: electricityIncludedInRent
+							? ''
+							: formData.commonOpenUnit,
+						commonCloseUnit: electricityIncludedInRent
+							? ''
+							: formData.commonCloseUnit,
+						mainMeterBilled: electricityIncludedInRent
+							? ''
+							: formData.mainMeterBilled,
+						mainMeterConsumedUnit: electricityIncludedInRent
+							? ''
+							: formData.mainMeterConsumedUnit,
 					},
 					expiresAt: Date.now() + 1000 * 60 * 60 * 24, // 1 day
 					createdAt: Date.now(),
@@ -401,6 +458,34 @@ export default function NewBillPage() {
 			{header()}
 			<form onSubmit={handleSubmit} className='flex-grow pb-20'>
 				<div className='my-4 mx-1'>
+					<button
+						type='button'
+						role='checkbox'
+						aria-checked={electricityIncludedInRent}
+						onClick={() =>
+							setElectricityIncludedInRent((prev) => !prev)
+						}
+						className={cn(
+							'inline-flex items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors',
+							electricityIncludedInRent
+								? 'border-primary bg-primary text-primary-foreground shadow'
+								: 'border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground'
+						)}>
+						<span
+							className={cn(
+								'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border',
+								electricityIncludedInRent
+									? 'border-primary-foreground/40 bg-primary-foreground/20'
+									: 'border-muted-foreground/40'
+							)}>
+							{electricityIncludedInRent && (
+								<FaCheck className='h-3 w-3' />
+							)}
+						</span>
+						Electricity bill included in rent
+					</button>
+				</div>
+				<div className='my-4 mx-1'>
 					<label>Flat</label>
 					<FlatSelect
 						value={formData.flat}
@@ -411,14 +496,33 @@ export default function NewBillPage() {
 				</div>
 				<div className='my-4 mx-1'>
 					<label>Guest name</label>
-					<Input
-						name='guestName'
-						value={formData.guestName}
-						onChange={handleChange}
-						required
-						type='text'
-						inputMode='text'
-					/>
+					<div className='relative'>
+						<Input
+							name='guestName'
+							value={
+								fetchingGuestName ? '' : formData.guestName
+							}
+							onChange={handleChange}
+							required={!fetchingGuestName}
+							disabled={fetchingGuestName}
+							type='text'
+							inputMode='text'
+						/>
+						{fetchingGuestName && (
+							<span
+								className='pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 items-center gap-2 text-sm text-muted-foreground'
+								aria-live='polite'>
+								<span
+									className='typing-indicator flex items-center gap-1'
+									aria-hidden>
+									<span />
+									<span />
+									<span />
+								</span>
+								fetching name
+							</span>
+						)}
+					</div>
 				</div>
 				<div className='grid grid-cols-2 gap-4'>
 					<div className='mx-1'>
@@ -478,7 +582,8 @@ export default function NewBillPage() {
 							name='openingUnit'
 							value={formData.openingUnit}
 							onChange={handleChange}
-							required
+							required={!electricityIncludedInRent}
+							disabled={electricityIncludedInRent}
 							type='number'
 							inputMode='numeric'
 							pattern='[0-9]*'
@@ -491,7 +596,8 @@ export default function NewBillPage() {
 						name='closingUnit'
 						value={formData.closingUnit}
 						onChange={handleChange}
-						required
+						required={!electricityIncludedInRent}
+						disabled={electricityIncludedInRent}
 						type='number'
 						inputMode='numeric'
 						pattern='[0-9]*'
@@ -499,7 +605,14 @@ export default function NewBillPage() {
 				</div>
 				<div className='my-4 mx-1'>
 					<label>Used Unit</label>
-					<div>{formData.usedUnit}</div>
+					<div
+						className={
+							electricityIncludedInRent
+								? 'text-muted-foreground'
+								: undefined
+						}>
+						{formData.usedUnit}
+					</div>
 				</div>
 
 				<div className='my-4 mx-1'>
@@ -520,7 +633,8 @@ export default function NewBillPage() {
 						name='commonOpenUnit'
 						value={formData.commonOpenUnit}
 						onChange={handleChange}
-						required
+						required={!electricityIncludedInRent}
+						disabled={electricityIncludedInRent}
 						type='number'
 						inputMode='numeric'
 						pattern='[0-9]*'
@@ -532,7 +646,8 @@ export default function NewBillPage() {
 						name='commonCloseUnit'
 						value={formData.commonCloseUnit}
 						onChange={handleChange}
-						required
+						required={!electricityIncludedInRent}
+						disabled={electricityIncludedInRent}
 						type='number'
 						inputMode='numeric'
 						pattern='[0-9]*'
@@ -540,7 +655,14 @@ export default function NewBillPage() {
 				</div>
 				<div className='my-4 mx-1'>
 					<label>Common Used Unit</label>
-					<div>{formData.commonUsedUnit}</div>
+					<div
+						className={
+							electricityIncludedInRent
+								? 'text-muted-foreground'
+								: undefined
+						}>
+						{formData.commonUsedUnit}
+					</div>
 				</div>
 				<div className='my-4 mx-1'>
 					<label>Chargeable Unit</label>
@@ -552,7 +674,8 @@ export default function NewBillPage() {
 						name='mainMeterBilled'
 						value={formData.mainMeterBilled}
 						onChange={handleChange}
-						required
+						required={!electricityIncludedInRent}
+						disabled={electricityIncludedInRent}
 						type='number'
 						inputMode='numeric'
 						pattern='[0-9]*'
@@ -564,7 +687,8 @@ export default function NewBillPage() {
 						name='mainMeterConsumedUnit'
 						value={formData.mainMeterConsumedUnit}
 						onChange={handleChange}
-						required
+						required={!electricityIncludedInRent}
+						disabled={electricityIncludedInRent}
 						type='number'
 						inputMode='numeric'
 						pattern='[0-9]*'
@@ -572,11 +696,25 @@ export default function NewBillPage() {
 				</div>
 				<div className='my-4 mx-1'>
 					<label>Rate Per Unit</label>
-					<div>{formData.ratePerUnit}</div>
+					<div
+						className={
+							electricityIncludedInRent
+								? 'text-muted-foreground'
+								: undefined
+						}>
+						{formData.ratePerUnit}
+					</div>
 				</div>
 				<div className='my-4 mx-1'>
 					<label>Sub Total</label>
-					<div>{formData.subTotal}</div>
+					<div
+						className={
+							electricityIncludedInRent
+								? 'text-muted-foreground'
+								: undefined
+						}>
+						{formData.subTotal}
+					</div>
 				</div>
 				<div className='my-4 mx-1'>
 					<label>House Rent</label>

@@ -16,6 +16,7 @@ export const config = {
     "/(api|trpc)(.*)",
     "/",
     "/settings",
+    "/settings/:path*",
     "/bills",
     "/bills/:path*",
   ],

@@ -35,10 +35,22 @@ export type BillType = {
   grandTotal: string;
 };
 
+export type NoteType = {
+  id: string;
+  text: string;
+  date: string;
+  attachmentName?: string;
+  attachmentId?: string;
+  attachmentMimeType?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type FlatDetailsType = {
   [flat: string]: {
     rent: number;
     guest_name: string;
+    notes_gist_id?: string;
   };
 };
 

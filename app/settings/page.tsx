@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { FaArrowLeft } from "react-icons/fa";
+import { FaFloppyDisk, FaNoteSticky } from "react-icons/fa6";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -69,7 +70,16 @@ export default function SettingsPage() {
       <div className="grid gap-4 p-4">
         {Object.entries(flatDetails).map(([flat, details]) => (
           <div key={flat} className="border rounded-lg p-4">
-            <h2 className="text-xl font-semibold mb-4">Flat {flat}</h2>
+            <div className="flex items-center justify-between mb-4 gap-2">
+              <h2 className="text-xl font-semibold">Flat {flat}</h2>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/settings/notes/${flat}`)}
+              >
+                <FaNoteSticky />
+                Notes
+              </Button>
+            </div>
 
             <div className="my-4 mx-1">
               <label>Guest name</label>
@@ -115,6 +125,7 @@ export default function SettingsPage() {
                 await updateFlatDetails();
               }}
             >
+              <FaFloppyDisk />
               Update
             </Button>
           </div>

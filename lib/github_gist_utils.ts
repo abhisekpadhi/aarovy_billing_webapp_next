@@ -1,3 +1,4 @@
+import { FlatDetailsType, NoteType } from "@/lib/models";
 import axios from "axios";
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN || "";
@@ -5,6 +6,8 @@ const INDEX_GIST_ID = process.env.INDEX_GIST_ID || "";
 const FLAT_DETAILS_GIST_ID = process.env.FLAT_DETAILS_GIST_ID || "";
 const FLAT_DETAILS_FILE_NAME = process.env.FLAT_DETAILS_FILE_NAME || "";
 const INDEX_FILE_NAME = process.env.INDEX_FILE_NAME || "";
+
+const notesFileName = (flat: string) => `aarovy_notes_${flat}.json`;
 
 const createNewGist = async (
   name: string,
@@ -146,7 +149,7 @@ const getOrCreateMonthlyBillsGist = async (year: number, month: number) => {
   };
 };
 
-const getFlatDetails = async () => {
+const getFlatDetails = async (): Promise<FlatDetailsType> => {
   const gistId = FLAT_DETAILS_GIST_ID;
   const fileName = FLAT_DETAILS_FILE_NAME;
   const content = await getGistContent(gistId, fileName);
@@ -159,10 +162,75 @@ const updateFlatDetails = async (content: string) => {
   await updateGistContent(gistId, content, fileName);
 };
 
+const createNotesGistForFlat = async (flat: string) => {
+  const fileName = notesFileName(flat);
+  const gistId = await createNewGist(
+    fileName,
+    `AAROVY NOTES FOR FLAT ${flat}`,
+    "[]"
+  );
+
+  const flatDetails = await getFlatDetails();
+  if (!flatDetails[flat]) {
+    throw new Error(`Flat ${flat} not found in flat details`);
+  }
+
+  flatDetails[flat] = {
+    ...flatDetails[flat],
+    notes_gist_id: gistId,
+  };
+  await updateFlatDetails(JSON.stringify(flatDetails, null, 2));
+
+  return gistId;
+};
+
+const getOrCreateNotesGistForFlat = async (flat: string) => {
+  const flatDetails = await getFlatDetails();
+  const flatRecord = flatDetails[flat];
+  if (!flatRecord) {
+    throw new Error(`Flat ${flat} not found in flat details`);
+  }
+
+  const fileName = notesFileName(flat);
+  const existingGistId = flatRecord.notes_gist_id;
+
+  if (existingGistId) {
+    const content = (await getGistContent(
+      existingGistId,
+      fileName
+    )) as NoteType[];
+    return {
+      gistId: existingGistId,
+      content: Array.isArray(content) ? content : [],
+    };
+  }
+
+  const newGistId = await createNotesGistForFlat(flat);
+  const content = (await getGistContent(newGistId, fileName)) as NoteType[];
+  return {
+    gistId: newGistId,
+    content: Array.isArray(content) ? content : [],
+  };
+};
+
+const updateNotesForFlat = async (
+  flat: string,
+  gistId: string,
+  notes: NoteType[]
+) => {
+  await updateGistContent(
+    gistId,
+    JSON.stringify(notes, null, 2),
+    notesFileName(flat)
+  );
+};
+
 export const GistUtils = {
   updateFlatDetails,
   getFlatDetails,
   getOrCreateMonthlyBillsGist,
+  getOrCreateNotesGistForFlat,
+  updateNotesForFlat,
   getGistContent,
   updateGistContent,
   getIndex,

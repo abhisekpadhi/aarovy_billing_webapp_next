@@ -1,4 +1,13 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { AppCtx, AppCtxType } from "@/lib/models";
 import { ClerkProvider, SignedIn, SignOutButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -15,6 +24,50 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+function SignOutConfirmButton() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        type="button"
+        className="rounded-full bg-red-600 text-white hover:bg-red-700"
+        onClick={() => setOpen(true)}
+      >
+        Sign out
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Sign out?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to sign out?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <SignOutButton redirectUrl="/bills">
+              <Button
+                type="button"
+                className="rounded-full bg-red-600 text-white hover:bg-red-700"
+              >
+                Sign out
+              </Button>
+            </SignOutButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -33,9 +86,7 @@ export default function RootLayout({
         >
           <header className="flex justify-end items-center p-4 gap-4 h-16">
             <SignedIn>
-              <div className="text-red-500">
-                <SignOutButton redirectUrl="/bills" />
-              </div>
+              <SignOutConfirmButton />
             </SignedIn>
           </header>
           <AppCtx.Provider value={ctxValue}>
