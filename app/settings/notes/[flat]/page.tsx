@@ -79,7 +79,7 @@ function ImageAttachmentPreview({ note }: { note: NoteType }) {
       href={driveFileUrl(note.attachmentId)}
       target="_blank"
       rel="noreferrer"
-      className="relative mb-3 flex min-h-32 w-fit min-w-48 items-center justify-center overflow-hidden rounded-lg border bg-muted/30"
+      className="relative mb-3 flex min-h-32 w-full items-center justify-center overflow-hidden rounded-lg border bg-muted/30 sm:w-fit sm:min-w-48"
       aria-label={`Open ${note.attachmentName || "image"} in Google Drive`}
     >
       {isPreviewLoading && !previewFailed ? (
@@ -107,7 +107,7 @@ function ImageAttachmentPreview({ note }: { note: NoteType }) {
             setIsPreviewLoading(false);
             setPreviewFailed(true);
           }}
-          className={`max-h-48 w-auto object-contain transition-opacity ${
+          className={`max-h-56 max-w-full object-contain transition-opacity ${
             isPreviewLoading ? "opacity-0" : "opacity-100"
           }`}
         />
@@ -297,7 +297,7 @@ export default function FlatNotesPage() {
   }
 
   return (
-    <div>
+    <main className="mx-auto w-full max-w-3xl overflow-x-hidden">
       {isAddingNote && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60">
           <div className="flex flex-col items-center gap-3 rounded-lg bg-background px-8 py-6 shadow-lg">
@@ -309,24 +309,28 @@ export default function FlatNotesPage() {
           </div>
         </div>
       )}
-      <div className="flex items-center mb-4">
+      <header className="flex items-center gap-3 px-3 py-3 sm:px-4 sm:py-4">
         <Button
           variant="default"
           onClick={() => router.push("/settings")}
-          className="w-10 h-10 p-0 flex items-center justify-center"
+          className="w-10 h-10 p-0 flex items-center justify-center shrink-0"
         >
           <FaArrowLeft />
         </Button>
-        <div className="mx-4">
-          <h1 className="text-2xl font-bold">Notes · Flat {flat}</h1>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
+            Notes · Flat {flat}
+          </h1>
           {guestName ? (
-            <p className="text-sm text-muted-foreground">{guestName}</p>
+            <p className="text-sm text-muted-foreground truncate">
+              {guestName}
+            </p>
           ) : null}
         </div>
-      </div>
+      </header>
 
-      <div className="grid gap-3 p-4">
-        <div className="border rounded-lg p-4 grid gap-3">
+      <div className="grid gap-3 px-3 pb-4 sm:px-4">
+        <section className="grid gap-3 rounded-lg border p-3 sm:p-4">
           <div>
             <label className="text-sm">Note</label>
             <ExpandingTextarea
@@ -362,15 +366,15 @@ export default function FlatNotesPage() {
             />
             <label
               htmlFor="new-note-attachment"
-              className="mt-1 inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="mt-1 flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-center text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-flex sm:min-h-9 sm:w-auto"
             >
-              <FaPaperclip />
+              <FaPaperclip className="shrink-0" />
               Click to select photo/file to upload
             </label>
             {newFile ? (
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <FaPaperclip className="h-3 w-3" />
-                {newFile.name}
+              <p className="mt-1 flex min-w-0 items-start gap-1 text-xs text-muted-foreground">
+                <FaPaperclip className="mt-0.5 h-3 w-3 shrink-0" />
+                <span className="break-all">{newFile.name}</span>
               </p>
             ) : (
               <p className="text-xs text-muted-foreground mt-1">
@@ -378,11 +382,15 @@ export default function FlatNotesPage() {
               </p>
             )}
           </div>
-          <Button disabled={isSaving || isAddingNote} onClick={addNote}>
+          <Button
+            className="h-11 sm:h-9"
+            disabled={isSaving || isAddingNote}
+            onClick={addNote}
+          >
             <FaFloppyDisk />
             Add note
           </Button>
-        </div>
+        </section>
 
         {notes.length === 0 ? (
           <div className="text-muted-foreground py-6 text-center">
@@ -390,32 +398,38 @@ export default function FlatNotesPage() {
           </div>
         ) : (
           notes.map((note) => (
-            <div key={note.id} className="border rounded-lg p-4">
-              <p className="whitespace-pre-wrap mb-3">{note.text}</p>
+            <article key={note.id} className="min-w-0 rounded-lg border p-3 sm:p-4">
+              <p className="mb-3 whitespace-pre-wrap break-words">{note.text}</p>
               {note.attachmentId && isImageMime(note.attachmentMimeType) ? (
                 <ImageAttachmentPreview note={note} />
               ) : null}
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-sm text-muted-foreground space-y-1">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0 flex-1 text-sm text-muted-foreground space-y-1">
                   <div>{displayNoteDate(note.date)}</div>
                   {note.attachmentId && note.attachmentName ? (
-                    <Button variant="outline" size="sm" asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="max-w-full"
+                    >
                       <a
                         href={driveFileUrl(note.attachmentId)}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        <FaPaperclip />
-                        {note.attachmentName}
-                        <FaArrowUpRightFromSquare />
+                        <FaPaperclip className="shrink-0" />
+                        <span className="truncate">{note.attachmentName}</span>
+                        <FaArrowUpRightFromSquare className="shrink-0" />
                       </a>
                     </Button>
                   ) : null}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <Button
                     variant="outline"
                     size="icon"
+                    className="h-11 w-11 sm:h-9 sm:w-9"
                     onClick={() => {
                       setEditingNote(note);
                       setEditText(note.text);
@@ -429,7 +443,7 @@ export default function FlatNotesPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="text-red-600 hover:text-red-700"
+                    className="h-11 w-11 text-red-600 hover:text-red-700 sm:h-9 sm:w-9"
                     onClick={() => {
                       setDeletingNote(note);
                       setDeleteOpen(true);
@@ -439,13 +453,13 @@ export default function FlatNotesPage() {
                   </Button>
                 </div>
               </div>
-            </div>
+            </article>
           ))
         )}
       </div>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] overflow-y-auto rounded-lg p-4 sm:max-w-[425px] sm:p-6">
           <DialogHeader>
             <DialogTitle>Edit note</DialogTitle>
             <DialogDescription>
@@ -487,20 +501,23 @@ export default function FlatNotesPage() {
               />
               <label
                 htmlFor="edit-note-attachment"
-                className="mt-1 inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="mt-1 flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-input bg-background px-4 py-2 text-center text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-flex sm:min-h-9 sm:w-auto"
               >
-                <FaPaperclip />
+                <FaPaperclip className="shrink-0" />
                 Click to select photo/file to upload
               </label>
               {editFile ? (
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <FaPaperclip className="h-3 w-3" />
-                  {editFile.name}
+                <p className="mt-1 flex min-w-0 items-start gap-1 text-xs text-muted-foreground">
+                  <FaPaperclip className="mt-0.5 h-3 w-3 shrink-0" />
+                  <span className="break-all">{editFile.name}</span>
                 </p>
               ) : editingNote?.attachmentName ? (
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <FaPaperclip className="h-3 w-3" />
-                  Current: {editingNote.attachmentName} (replacing keeps 1 file)
+                <p className="mt-1 flex min-w-0 items-start gap-1 text-xs text-muted-foreground">
+                  <FaPaperclip className="mt-0.5 h-3 w-3 shrink-0" />
+                  <span className="break-all">
+                    Current: {editingNote.attachmentName} (replacing keeps 1
+                    file)
+                  </span>
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground mt-1">
@@ -509,15 +526,20 @@ export default function FlatNotesPage() {
               )}
             </div>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0 [&>button]:w-full sm:[&>button]:w-auto">
             <Button
               variant="outline"
+              className="h-11 sm:h-9"
               onClick={() => setEditOpen(false)}
               disabled={isSaving}
             >
               Cancel
             </Button>
-            <Button onClick={saveEdit} disabled={isSaving}>
+            <Button
+              className="h-11 sm:h-9"
+              onClick={saveEdit}
+              disabled={isSaving}
+            >
               {isSaving ? (
                 <>
                   <span
@@ -541,21 +563,22 @@ export default function FlatNotesPage() {
           setDeleteOpen(open);
         }}
       >
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="w-[calc(100%-1rem)] rounded-lg p-4 sm:max-w-[400px] sm:p-6">
           <DialogHeader>
             <DialogTitle>Delete note?</DialogTitle>
             <DialogDescription>This cannot be undone.</DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0 [&>button]:w-full sm:[&>button]:w-auto">
             <Button
               variant="outline"
+              className="h-11 sm:h-9"
               onClick={() => setDeleteOpen(false)}
               disabled={isDeletingNote}
             >
               Cancel
             </Button>
             <Button
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="h-11 bg-red-600 text-white hover:bg-red-700 sm:h-9"
               onClick={confirmDelete}
               disabled={isDeletingNote}
             >
@@ -574,6 +597,6 @@ export default function FlatNotesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   );
 }
